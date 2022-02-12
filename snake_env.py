@@ -74,7 +74,7 @@ Model Notes:
     self.reward = self.total_reward - self.prev_reward
     self.prev_reward = self.total_reward
 
-- The rest is the same as 1644687068, commit hash: 75d6d5c910c447b03544e8566929a01251a1d3b8
+- The rest is the same as 1644687068, commit hash: bf764cc60296c264169e3c081fe4fb15be722ec7
 """
 
 
