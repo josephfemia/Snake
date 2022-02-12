@@ -55,6 +55,8 @@ Model Notes:
     observation = [head_x, head_y, apple_delta_x,
         apple_delta_y, snake_length] + list(self.prev_actions)
 
+- For exact code check commit: 31ac5e3b26478aca24dc50da4e6de27c35336e28 (the only difference will be the reward for getting an apple)
+
 1644690486, PPO
 - Same thing as 1644687068, but diff reward for getting an apple 
 - Reward for getting an apple, 10,000
