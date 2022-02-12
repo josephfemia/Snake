@@ -64,6 +64,17 @@ Model Notes:
 1644690553, PPO
 - Same thing as 1644687068, but diff reward for getting an apple 
 - Reward for getting an apple, 1,000
+
+1644701321, PPO
+- Reward for getting an apple, 25
+- 1/x function that rewards more and more the closer to apple (exp on euclidean dist)
+- Reward function tuned to use a 1/x function rather than something linear:
+     euclidean_dist_to_apple = np.linalg.norm(np.array(self.snake_head) - np.array(self.apple_position))
+    self.total_reward = (450/euclidean_dist_to_apple) + apple_reward
+    self.reward = self.total_reward - self.prev_reward
+    self.prev_reward = self.total_reward
+
+- The rest is the same as 1644687068, commit hash: 75d6d5c910c447b03544e8566929a01251a1d3b8
 """
 
 
@@ -75,20 +86,17 @@ class SnakeEnv(gym.Env):
         # Example when using discrete actions:
         self.action_space = spaces.Discrete(4)
         # Example for using image as input (channel-first; channel-last also works):
-        self.observation_space = spaces.Box(low=-500, high=500,
-                                            shape=(SNAKE_LEN_GOAL+5, ), dtype=np.float32)
+        self.observation_space = spaces.Box(low=-500, high=500, shape=(SNAKE_LEN_GOAL+5, ), dtype=np.float32)
 
     def step(self, action):
         cv2.imshow('a', self.img)
         cv2.waitKey(1)
         self.img = np.zeros((500, 500, 3), dtype='uint8')
         # Display Apple
-        cv2.rectangle(self.img, (self.apple_position[0], self.apple_position[1]), (
-            self.apple_position[0]+10, self.apple_position[1]+10), (0, 0, 255), 3)
+        cv2.rectangle(self.img, (self.apple_position[0], self.apple_position[1]), (self.apple_position[0]+10, self.apple_position[1]+10), (0, 0, 255), 3)
         # Display Snake
         for position in self.snake_position:
-            cv2.rectangle(self.img, (position[0], position[1]),
-                          (position[0]+10, position[1]+10), (0, 255, 0), 3)
+            cv2.rectangle(self.img, (position[0], position[1]), (position[0]+10, position[1]+10), (0, 255, 0), 3)
 
         # Takes step after fixed time
         t_end = time.time() + 0.05
@@ -114,10 +122,9 @@ class SnakeEnv(gym.Env):
         apple_reward = 0
         # Increase Snake length on eating apple
         if self.snake_head == self.apple_position:
-            self.apple_position, self.score = collision_with_apple(
-                self.apple_position, self.score)
+            self.apple_position, self.score = collision_with_apple(self.apple_position, self.score)
             self.snake_position.insert(0, list(self.snake_head))
-            apple_reward = 1000
+            apple_reward = 25
 
         else:
             self.snake_position.insert(0, list(self.snake_head))
@@ -127,15 +134,12 @@ class SnakeEnv(gym.Env):
         if collision_with_boundaries(self.snake_head) == 1 or collision_with_self(self.snake_position) == 1:
             font = cv2.FONT_HERSHEY_SIMPLEX
             self.img = np.zeros((500, 500, 3), dtype='uint8')
-            cv2.putText(self.img, 'Your Score is {}'.format(
-                self.score), (140, 250), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
+            cv2.putText(self.img, 'Your Score is {}'.format(self.score), (140, 250), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
             cv2.imshow('a', self.img)
             self.done = True
 
-        euclidean_dist_to_apple = np.linalg.norm(
-            np.array(self.snake_head) - np.array(self.apple_position))
-        self.total_reward = (
-            (250 - euclidean_dist_to_apple) + apple_reward) / 100
+        euclidean_dist_to_apple = np.linalg.norm(np.array(self.snake_head) - np.array(self.apple_position))
+        self.total_reward = (450/euclidean_dist_to_apple) + apple_reward
         self.reward = self.total_reward - self.prev_reward
         self.prev_reward = self.total_reward
 
@@ -151,8 +155,7 @@ class SnakeEnv(gym.Env):
         apple_delta_y = self.apple_position[1] - head_y
 
         # create observation:
-        observation = [head_x, head_y, apple_delta_x,
-                       apple_delta_y, snake_length] + list(self.prev_actions)
+        observation = [head_x, head_y, apple_delta_x, apple_delta_y, snake_length] + list(self.prev_actions)
         observation = np.array(observation)
 
         return observation, self.reward, self.done, info
@@ -182,8 +185,7 @@ class SnakeEnv(gym.Env):
         for i in range(SNAKE_LEN_GOAL):
             self.prev_actions.append(-1)
 
-        observation = [head_x, head_y, apple_delta_x,
-                       apple_delta_y, snake_length] + list(self.prev_actions)
+        observation = [head_x, head_y, apple_delta_x, apple_delta_y, snake_length] + list(self.prev_actions)
         observation = np.array(observation)
 
         return observation
