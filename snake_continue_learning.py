@@ -2,7 +2,7 @@ from stable_baselines3 import PPO
 
 from snake_env import SnakeEnv
 
-TIME = '1644686459'
+TIME = '1644687068'
 START_TIMESTEP = 10000
 
 models_dir = f'models/{TIME}'

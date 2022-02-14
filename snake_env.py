@@ -65,16 +65,22 @@ Model Notes:
 - Same thing as 1644687068, but diff reward for getting an apple 
 - Reward for getting an apple, 1,000
 
-1644701321, PPO
+1644701321 and 1644733599, PPO
 - Reward for getting an apple, 25
 - 1/x function that rewards more and more the closer to apple (exp on euclidean dist)
 - Reward function tuned to use a 1/x function rather than something linear:
      euclidean_dist_to_apple = np.linalg.norm(np.array(self.snake_head) - np.array(self.apple_position))
-    self.total_reward = (450/euclidean_dist_to_apple) + apple_reward
+    self.total_reward = (450/(euclidean_dist_to_apple+1)) + apple_reward
     self.reward = self.total_reward - self.prev_reward
     self.prev_reward = self.total_reward
 
 - The rest is the same as 1644687068, commit hash: bf764cc60296c264169e3c081fe4fb15be722ec7
+
+PPO
+- Reward for getting an apple, 100
+- Rweard for dying is decreased to -1000
+
+The rest is the same as 1644701321 and 1644733599, commit hash: 
 """
 
 
@@ -124,7 +130,7 @@ class SnakeEnv(gym.Env):
         if self.snake_head == self.apple_position:
             self.apple_position, self.score = collision_with_apple(self.apple_position, self.score)
             self.snake_position.insert(0, list(self.snake_head))
-            apple_reward = 25
+            apple_reward = 100
 
         else:
             self.snake_position.insert(0, list(self.snake_head))
@@ -139,12 +145,12 @@ class SnakeEnv(gym.Env):
             self.done = True
 
         euclidean_dist_to_apple = np.linalg.norm(np.array(self.snake_head) - np.array(self.apple_position))
-        self.total_reward = (450/euclidean_dist_to_apple) + apple_reward
+        self.total_reward = (450/(euclidean_dist_to_apple+1)) + apple_reward
         self.reward = self.total_reward - self.prev_reward
         self.prev_reward = self.total_reward
 
         if self.done:
-            self.reward = -10
+            self.reward = -1000
         info = {}
 
         head_x = self.snake_head[0]

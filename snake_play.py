@@ -3,7 +3,7 @@ from stable_baselines3 import PPO
 from snake_env import SnakeEnv
 
 models_dir = f'models/1644687068'
-model_path = f'{models_dir}/10000.zip'
+model_path = f'{models_dir}/1240000.zip'
 
 env = SnakeEnv()
 env.reset()
