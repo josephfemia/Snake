@@ -76,11 +76,11 @@ Model Notes:
 
 - The rest is the same as 1644687068, commit hash: bf764cc60296c264169e3c081fe4fb15be722ec7
 
-PPO
+1644846992, PPO
 - Reward for getting an apple, 100
 - Rweard for dying is decreased to -1000
 
-The rest is the same as 1644701321 and 1644733599, commit hash: 
+The rest is the same as 1644701321 and 1644733599, commit hash: 3ea8ff1ded699d051abf9225ef540f65e23df1f5
 """
 
 
