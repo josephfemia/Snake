@@ -73,14 +73,20 @@ Model Notes:
     self.total_reward = (450/(euclidean_dist_to_apple+1)) + apple_reward
     self.reward = self.total_reward - self.prev_reward
     self.prev_reward = self.total_reward
-
 - The rest is the same as 1644687068, commit hash: bf764cc60296c264169e3c081fe4fb15be722ec7
 
 1644846992, PPO
 - Reward for getting an apple, 100
-- Rweard for dying is decreased to -1000
+- Reward for dying is decreased to -1000
+- The rest is the same as 1644701321 and 1644733599, commit hash: 3ea8ff1ded699d051abf9225ef540f65e23df1f5
 
-The rest is the same as 1644701321 and 1644733599, commit hash: 3ea8ff1ded699d051abf9225ef540f65e23df1f5
+1644853531, PPO
+- Reward for dying is decreased to -100
+- The rest is the same as 1644846992
+
+1644873612, PPO
+- Reward for getting an apple increased to 1000
+- The rest is the same as 1644846992
 """
 
 
@@ -130,7 +136,7 @@ class SnakeEnv(gym.Env):
         if self.snake_head == self.apple_position:
             self.apple_position, self.score = collision_with_apple(self.apple_position, self.score)
             self.snake_position.insert(0, list(self.snake_head))
-            apple_reward = 100
+            apple_reward = 1000
 
         else:
             self.snake_position.insert(0, list(self.snake_head))
@@ -150,7 +156,7 @@ class SnakeEnv(gym.Env):
         self.prev_reward = self.total_reward
 
         if self.done:
-            self.reward = -1000
+            self.reward = -100
         info = {}
 
         head_x = self.snake_head[0]
