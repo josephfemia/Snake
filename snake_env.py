@@ -111,7 +111,7 @@ Model Notes:
 1645894485, PPO
 - Removed comparison of total and previous rewards
 - Removed issue where overwrite reward with a constant when dead.
-- The rest is the same as 1645888751, commit hash: 
+- The rest is the same as 1645888751, commit hash: 66d176adc7696d7e66a0c4b2faaabf92a783e08f
 """
 
 
