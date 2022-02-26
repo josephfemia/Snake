@@ -146,7 +146,7 @@ Model Notes:
 - Remove euclidian distance (no longer involved in observation space or reward structure)
 - Updated reward function:
     self.reward = apple_reward + death_reward
-- The rest is the same as 1645894485, commit hash: 
+- The rest is the same as 1645894485, commit hash: 028fbd92684474c2c32f42635d2dd86a937f8014
 """
 
 
