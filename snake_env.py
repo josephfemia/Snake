@@ -93,7 +93,7 @@ Model Notes:
 - Apple reward = 10
 - Dying reward = -10
 - Cost of .05 for taking each step has now been implemented
-- Pretty major change, commit hash: 
+- Pretty major change, commit hash: 288cb78e064f0b91527802040f07b0ca0e335b69
 """
 
 
