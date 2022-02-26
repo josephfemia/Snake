@@ -107,6 +107,11 @@ Model Notes:
 - Changed total reward to include euclidian distance to:
     self.total_reward = (-1.5^(-euclidean_dist_to_apple/700)) - .05 + apple_reward 
 - The rest is the same as 1645886845, commit hash: 8eba3ba98779e51aba89a57033fc9d3f08ce4a33
+
+1645894485, PPO
+- Removed comparison of total and previous rewards
+- Removed issue where overwrite reward with a constant when dead.
+- The rest is the same as 1645888751, commit hash: 
 """
 
 
@@ -162,6 +167,7 @@ class SnakeEnv(gym.Env):
             self.snake_position.insert(0, list(self.snake_head))
             self.snake_position.pop()
 
+        death_reward = 0
         # On collision kill the snake and print the score
         if collision_with_boundaries(self.snake_head) == 1 or collision_with_self(self.snake_position) == 1:
             font = cv2.FONT_HERSHEY_SIMPLEX
@@ -169,14 +175,11 @@ class SnakeEnv(gym.Env):
             cv2.putText(self.img, 'Your Score is {}'.format(self.score), (140, 250), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
             cv2.imshow('a', self.img)
             self.done = True
+            death_reward = -5
 
         euclidean_dist_to_apple = np.linalg.norm(np.array(self.snake_head) - np.array(self.apple_position))
-        self.total_reward = (-1.5**(-euclidean_dist_to_apple/700)) - .05 + apple_reward
-        self.reward = self.total_reward - self.prev_reward
-        self.prev_reward = self.total_reward
+        self.reward = (-1.5**(-euclidean_dist_to_apple/700)) - .05 + apple_reward + death_reward
 
-        if self.done:
-            self.reward = -5
         info = {}
 
         head_x = self.snake_head[0]
