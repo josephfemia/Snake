@@ -105,13 +105,39 @@ Model Notes:
 - Apple reward increased to 5
 - Reward for dying decreased to -5
 - Changed total reward to include euclidian distance to:
-    self.total_reward = (-1.5^(-euclidean_dist_to_apple/700)) - .05 + apple_reward 
+    self.total_reward = (-1.5**(-euclidean_dist_to_apple/700)) - .05 + apple_reward 
 - The rest is the same as 1645886845, commit hash: 8eba3ba98779e51aba89a57033fc9d3f08ce4a33
 
 1645894485, PPO
 - Removed comparison of total and previous rewards
 - Removed issue where overwrite reward with a constant when dead.
 - The rest is the same as 1645888751, commit hash: 66d176adc7696d7e66a0c4b2faaabf92a783e08f
+
+1645896013, PPO
+- Changed reward to include euclidian distance to:
+    self.reward = (1.5**(-euclidean_dist_to_apple/700)) + apple_reward + death_reward
+- The rest is the same as 1645894485
+
+1645896654, PPO
+- Updated reward function:
+    self.reward = 2.5 - (2.5*euclidean_dist_to_apple/700) + apple_reward + death_reward
+- The rest is the same as 1645894485
+
+1645904983, PPO
+- Apple reward increased to 50
+- Death reward decreased to -25
+- Updated reward function:
+    self.reward = -(30*euclidean_dist_to_apple/700) + apple_reward + death_reward
+- The rest is the same as 1645894485
+
+1645905867, PPO
+- Add an episode_length veriable to track how long the snake has been going for
+- Apple reward of 50
+- Death reward of -1 * self.episode_length * len(self.snake_position)
+- Trigger the game to end in 1000 steps
+- Changed reward function to:
+    self.reward = -euclidean_dist_to_apple/10 + apple_reward + death_reward
+- The rest is the same as 1645894485, commit hash: 
 """
 
 
@@ -157,11 +183,12 @@ class SnakeEnv(gym.Env):
             self.snake_head[1] -= 10
 
         apple_reward = 0
+        self.episode_length += 1
         # Increase Snake length on eating apple
         if self.snake_head == self.apple_position:
             self.apple_position, self.score = collision_with_apple(self.apple_position, self.score)
             self.snake_position.insert(0, list(self.snake_head))
-            apple_reward = 5
+            apple_reward = 50
 
         else:
             self.snake_position.insert(0, list(self.snake_head))
@@ -169,16 +196,16 @@ class SnakeEnv(gym.Env):
 
         death_reward = 0
         # On collision kill the snake and print the score
-        if collision_with_boundaries(self.snake_head) == 1 or collision_with_self(self.snake_position) == 1:
+        if collision_with_boundaries(self.snake_head) == 1 or collision_with_self(self.snake_position) == 1 or self.episode_length == 1000:
             font = cv2.FONT_HERSHEY_SIMPLEX
             self.img = np.zeros((500, 500, 3), dtype='uint8')
             cv2.putText(self.img, 'Your Score is {}'.format(self.score), (140, 250), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
             cv2.imshow('a', self.img)
             self.done = True
-            death_reward = -5
+            death_reward = -1 * self.episode_length * len(self.snake_position)
 
         euclidean_dist_to_apple = np.linalg.norm(np.array(self.snake_head) - np.array(self.apple_position))
-        self.reward = (-1.5**(-euclidean_dist_to_apple/700)) - .05 + apple_reward + death_reward
+        self.reward = -euclidean_dist_to_apple/10 + apple_reward + death_reward
 
         info = {}
 
@@ -206,7 +233,7 @@ class SnakeEnv(gym.Env):
         self.button_direction = 1
         self.snake_head = [250, 250]
 
-        self.prev_reward = 0
+        self.episode_length = 0
         self.done = False
 
         head_x = self.snake_head[0]
