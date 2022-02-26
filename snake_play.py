@@ -3,7 +3,7 @@ from stable_baselines3 import PPO
 from snake_env import SnakeEnv
 
 models_dir = f'models/1645907877'
-model_path = f'{models_dir}/2500000.zip'
+model_path = f'{models_dir}/3010000.zip'
 
 env = SnakeEnv()
 env.reset()
@@ -18,5 +18,5 @@ while True:
         env.render()
         action, _states = model.predict(obs)
         obs, rewards, done, info = env.step(action)
-        print(rewards)
+        # print(rewards)
     env.close()
