@@ -153,7 +153,7 @@ Model Notes:
 - Add previous action population
 - Store up to 30 coordiantes for the snake body positions, constantly updated with snake moving
     - The reason for this list having a len of 60 is because 30 body parts * 2 (for each of the x and y coordinates of the body part)
-- The rest is the same as 1645907877, commit hash: 
+- The rest is the same as 1645907877, commit hash: 8033e77393a7a1f891a90f9e42609eb661bb88fe
 """
 
 
