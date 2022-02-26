@@ -106,7 +106,7 @@ Model Notes:
 - Reward for dying decreased to -5
 - Changed total reward to include euclidian distance to:
     self.total_reward = (-1.5^(-euclidean_dist_to_apple/700)) - .05 + apple_reward 
-- The rest is the same as 1645886845, commit hash: 
+- The rest is the same as 1645886845, commit hash: 8eba3ba98779e51aba89a57033fc9d3f08ce4a33
 """
 
 
