@@ -137,7 +137,7 @@ Model Notes:
 - Trigger the game to end in 1000 steps
 - Changed reward function to:
     self.reward = -euclidean_dist_to_apple/10 + apple_reward + death_reward
-- The rest is the same as 1645894485, commit hash: 
+- The rest is the same as 1645894485, commit hash: b50939b3eb7634a1203f226125ba7a5920d28457
 """
 
 
