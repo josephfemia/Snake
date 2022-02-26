@@ -138,6 +138,15 @@ Model Notes:
 - Changed reward function to:
     self.reward = -euclidean_dist_to_apple/10 + apple_reward + death_reward
 - The rest is the same as 1645894485, commit hash: b50939b3eb7634a1203f226125ba7a5920d28457
+
+1645907877, PPO
+- Add variable to make snake die if goes certain amount of steps without an apple
+- Apple reward = 1
+- Death reward = -1
+- Remove euclidian distance (no longer involved in observation space or reward structure)
+- Updated reward function:
+    self.reward = apple_reward + death_reward
+- The rest is the same as 1645894485, commit hash: 
 """
 
 
@@ -165,25 +174,25 @@ class SnakeEnv(gym.Env):
             self.snake_head[1] -= 10
 
         apple_reward = 0
-        self.episode_length += 1
+        self.time_without_apple += 1
         # Increase Snake length on eating apple
         if self.snake_head == self.apple_position:
             self.apple_position, self.score = collision_with_apple(self.apple_position, self.score)
             self.snake_position.insert(0, list(self.snake_head))
-            apple_reward = 50
-
+            apple_reward = 1
+            self.time_without_apple = 0
         else:
             self.snake_position.insert(0, list(self.snake_head))
             self.snake_position.pop()
+            self.time_without_apple += 1
 
         death_reward = 0
         # On collision kill the snake and print the score
-        if collision_with_boundaries(self.snake_head) == 1 or collision_with_self(self.snake_position) == 1 or self.episode_length == 1000:
+        if collision_with_boundaries(self.snake_head) == 1 or collision_with_self(self.snake_position) == 1 or self.time_without_apple > 300:
             self.done = True
-            death_reward = -1 * self.episode_length * len(self.snake_position)
+            death_reward = -1
 
-        euclidean_dist_to_apple = np.linalg.norm(np.array(self.snake_head) - np.array(self.apple_position))
-        self.reward = -euclidean_dist_to_apple/10 + apple_reward + death_reward
+        self.reward = apple_reward + death_reward
 
         info = {}
 
@@ -211,7 +220,7 @@ class SnakeEnv(gym.Env):
         self.button_direction = 1
         self.snake_head = [250, 250]
 
-        self.episode_length = 0
+        self.time_without_apple = 0
         self.done = False
 
         head_x = self.snake_head[0]
