@@ -1,11 +1,11 @@
 from stable_baselines3 import PPO
 
-from snake_env import SnakeEnv
+from snake_play_environment import OGSnakeEnv
 
 models_dir = f'models/1645907877'
 model_path = f'{models_dir}/3010000.zip'
 
-env = SnakeEnv()
+env = OGSnakeEnv()
 env.reset()
 
 model = PPO.load(model_path, env=env)
