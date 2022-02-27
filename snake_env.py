@@ -167,7 +167,7 @@ Model Notes:
 - Pass in image of board as observation space
 - Remove all other previous stuff used in observation space
 - Same time_without_apple as 1645916294
-- Major change to environment, commit hash: 
+- Major change to environment, commit hash: 2665d3317a723f93b322ca3b6775666769266303
 """
 
 
