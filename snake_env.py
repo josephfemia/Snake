@@ -139,7 +139,7 @@ Model Notes:
     self.reward = -euclidean_dist_to_apple/10 + apple_reward + death_reward
 - The rest is the same as 1645894485, commit hash: b50939b3eb7634a1203f226125ba7a5920d28457
 
-1645907877, PPO
+1645907877, PPO - Best model so far (28610000.zip)
 - Add variable to make snake die if goes certain amount of steps without an apple
 - Apple reward = 1
 - Death reward = -1
@@ -154,6 +154,20 @@ Model Notes:
 - Store up to 30 coordiantes for the snake body positions, constantly updated with snake moving
     - The reason for this list having a len of 60 is because 30 body parts * 2 (for each of the x and y coordinates of the body part)
 - The rest is the same as 1645907877, commit hash: 8033e77393a7a1f891a90f9e42609eb661bb88fe
+
+1645916294, PPO
+- Decrease time_without_apple to 500 steps
+- The rest is the same as 1645915125
+
+1645916776, PPO
+- Remove previous actions population
+- The rest is the same as 1645915125
+
+1645980703, PPO
+- Pass in image of board as observation space
+- Remove all other previous stuff used in observation space
+- Same time_without_apple as 1645916294
+- Major change to environment, commit hash: 
 """
 
 
@@ -165,10 +179,9 @@ class SnakeEnv(gym.Env):
         # Example when using discrete actions:
         self.action_space = spaces.Discrete(4)
         # Example for using image as input (channel-first; channel-last also works):
-        self.observation_space = spaces.Box(low=-500, high=500, shape=(3*SNAKE_LEN_GOAL+5, ), dtype=np.float32)
+        self.observation_space = spaces.Box(low=0, high=2, shape=(500, 500), dtype='uint8')
 
     def step(self, action):
-        self.prev_actions.append(action)
         button_direction = action
 
         # Change the head position based on the button direction
@@ -187,20 +200,16 @@ class SnakeEnv(gym.Env):
         if self.snake_head == self.apple_position:
             self.apple_position, self.score = collision_with_apple(self.apple_position, self.score)
             self.snake_position.insert(0, list(self.snake_head))
-            self.snake_position_fixed = list(np.concatenate(self.snake_position[:SNAKE_LEN_GOAL*2]).flat)
-            self.snake_position_fixed += [-1] * (SNAKE_LEN_GOAL*2 - len(self.snake_position_fixed))
             apple_reward = 1
             self.time_without_apple = 0
         else:
             self.snake_position.insert(0, list(self.snake_head))
             self.snake_position.pop()
-            self.snake_position_fixed = list(np.concatenate(self.snake_position[:SNAKE_LEN_GOAL*2]).flat)
-            self.snake_position_fixed += [-1] * (SNAKE_LEN_GOAL*2 - len(self.snake_position_fixed))
             self.time_without_apple += 1
 
         death_reward = 0
         # On collision kill the snake and print the score
-        if collision_with_boundaries(self.snake_head) == 1 or collision_with_self(self.snake_position) == 1 or self.time_without_apple > 1000:
+        if collision_with_boundaries(self.snake_head) == 1 or collision_with_self(self.snake_position) == 1 or self.time_without_apple > 500:
             self.done = True
             death_reward = -1
 
@@ -208,16 +217,13 @@ class SnakeEnv(gym.Env):
 
         info = {}
 
-        head_x = self.snake_head[0]
-        head_y = self.snake_head[1]
-
-        snake_length = len(self.snake_position)
-        apple_delta_x = self.apple_position[0] - head_x
-        apple_delta_y = self.apple_position[1] - head_y
+        self.grid = np.zeros((500, 500), dtype='uint8')
+        self.grid[self.apple_position[0], self.apple_position[1]] = 2
+        for position in self.snake_position:
+            self.grid[position[0], position[1]] = 1
 
         # create observation:
-        observation = [head_x, head_y, apple_delta_x, apple_delta_y, snake_length] + list(self.prev_actions) + self.snake_position_fixed
-        observation = np.array(observation)
+        observation = self.grid
 
         return observation, self.reward, self.done, info
 
@@ -235,21 +241,12 @@ class SnakeEnv(gym.Env):
         self.time_without_apple = 0
         self.done = False
 
-        head_x = self.snake_head[0]
-        head_y = self.snake_head[1]
+        self.grid = np.zeros((500, 500), dtype='uint8')
+        self.grid[self.apple_position[0], self.apple_position[1]] = 2
+        for position in self.snake_position:
+            self.grid[position[0], position[1]] = 1
 
-        snake_length = len(self.snake_position)
-        apple_delta_x = self.apple_position[0] - head_x
-        apple_delta_y = self.apple_position[0] - head_y
-
-        self.prev_actions = deque(maxlen=SNAKE_LEN_GOAL)
-        self.snake_position_fixed = list(np.concatenate(self.snake_position[:SNAKE_LEN_GOAL*2]).flat)
-        self.snake_position_fixed += [-1] * (SNAKE_LEN_GOAL*2 - len(self.snake_position_fixed))
-        for i in range(SNAKE_LEN_GOAL):
-            self.prev_actions.append(-1)
-
-        observation = [head_x, head_y, apple_delta_x, apple_delta_y, snake_length] + list(self.prev_actions) + self.snake_position_fixed
-        observation = np.array(observation)
+        observation = self.grid
 
         return observation
 
