@@ -182,7 +182,7 @@ Model Notes:
 - Found a bug where we were over existmating the board size by 10
 - The reason for this is that we need to be able to draw the snake, but for our grid for RL each snake position is 1x1 not 10x10
 - This significantly increases training times
-- Pretty big fix in 2D environment, commit hash: 
+- Pretty big fix in 2D environment, commit hash: 33adfd38b9a4b254157bee849b5beef7e75d9100
 """
 
 
