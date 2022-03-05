@@ -17,7 +17,7 @@ if not os.path.exists(log_dir):
 env = SnakeEnv()
 env.reset()
 
-model = PPO('MlpPolicy', env, verbose=1, tensorboard_log=log_dir)
+model = PPO('CnnPolicy', env, verbose=1, tensorboard_log=log_dir)
 
 TIMESTEPS = 10000
 iters = 0

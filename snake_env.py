@@ -163,7 +163,7 @@ Model Notes:
 - Remove previous actions population
 - The rest is the same as 1645915125
 
-1645980703, PPO
+1646486111, PPO
 - Pass in image of board as observation space
 - Remove all other previous stuff used in observation space
 - Same time_without_apple as 1645916294
@@ -179,7 +179,7 @@ class SnakeEnv(gym.Env):
         # Example when using discrete actions:
         self.action_space = spaces.Discrete(4)
         # Example for using image as input (channel-first; channel-last also works):
-        self.observation_space = spaces.Box(low=0, high=2, shape=(500, 500), dtype='uint8')
+        self.observation_space = spaces.Box(low=0, high=255, shape=(500, 500, 1), dtype='uint8')
 
     def step(self, action):
         button_direction = action
@@ -217,10 +217,10 @@ class SnakeEnv(gym.Env):
 
         info = {}
 
-        self.grid = np.zeros((500, 500), dtype='uint8')
-        self.grid[self.apple_position[0], self.apple_position[1]] = 2
+        self.grid = np.zeros((500, 500, 1), dtype='uint8')
+        self.grid[self.apple_position[0], self.apple_position[1], 0] = 255
         for position in self.snake_position:
-            self.grid[position[0], position[1]] = 1
+            self.grid[position[0], position[1], 0] = 125
 
         # create observation:
         observation = self.grid
@@ -241,10 +241,10 @@ class SnakeEnv(gym.Env):
         self.time_without_apple = 0
         self.done = False
 
-        self.grid = np.zeros((500, 500), dtype='uint8')
-        self.grid[self.apple_position[0], self.apple_position[1]] = 2
+        self.grid = np.zeros((500, 500, 1), dtype='uint8')
+        self.grid[self.apple_position[0], self.apple_position[1], 0] = 255
         for position in self.snake_position:
-            self.grid[position[0], position[1]] = 1
+            self.grid[position[0], position[1], 0] = 125
 
         observation = self.grid
 
