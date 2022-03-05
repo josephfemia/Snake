@@ -16,8 +16,8 @@ if not os.path.exists(models_dir):
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
 
-env = make_vec_env(SnakeEnv, n_envs=4)
-env = VecFrameStack(env, n_stack=4)
+env = make_vec_env(SnakeEnv, n_envs=10)
+env = VecFrameStack(env, n_stack=10)
 env.reset()
 
 model = PPO('CnnPolicy', env, verbose=1, tensorboard_log=log_dir)
