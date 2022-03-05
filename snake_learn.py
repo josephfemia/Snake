@@ -2,6 +2,8 @@ import os
 import time
 
 from stable_baselines3 import PPO
+from stable_baselines3.common.env_util import make_vec_env
+from stable_baselines3.common.vec_env import VecFrameStack
 
 from snake_env import SnakeEnv
 
@@ -14,7 +16,8 @@ if not os.path.exists(models_dir):
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
 
-env = SnakeEnv()
+env = make_vec_env(SnakeEnv, n_envs=4)
+env = VecFrameStack(env, n_stack=4)
 env.reset()
 
 model = PPO('CnnPolicy', env, verbose=1, tensorboard_log=log_dir)

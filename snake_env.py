@@ -167,11 +167,22 @@ Model Notes:
 - Pass in image of board as observation space
 - Remove all other previous stuff used in observation space
 - Same time_without_apple as 1645916294
+- Use CnnPolicy for learning
 - Major change to environment, commit hash: 2362f13a406d22a4431d9367c7aac767fa6b7c8c
 
-1646486788, PPO
+1646488273, PPO
 - Speed up grid population
 - The rest is the same as 1646486111
+
+1646490862, PPO
+- Vectorizing the environment with 4 environments
+- The rest is the same as 1646488273
+
+1646506651, PPO
+- Found a bug where we were over existmating the board size by 10
+- The reason for this is that we need to be able to draw the snake, but for our grid for RL each snake position is 1x1 not 10x10
+- This significantly increases training times
+- Pretty big fix in 2D environment, commit hash: 
 """
 
 
@@ -180,7 +191,7 @@ class SnakeEnv(gym.Env):
         super(SnakeEnv, self).__init__()
         # Define action and observation space
         self.action_space = spaces.Discrete(4)
-        self.observation_space = spaces.Box(low=0, high=255, shape=(500, 500, 1), dtype='uint8')
+        self.observation_space = spaces.Box(low=0, high=255, shape=(50, 50, 1), dtype='uint8')
 
     def step(self, action):
         button_direction = action
@@ -201,13 +212,13 @@ class SnakeEnv(gym.Env):
         if self.snake_head == self.apple_position:
             self.apple_position, self.score = collision_with_apple(self.apple_position, self.score)
             self.snake_position.insert(0, list(self.snake_head))
-            self.grid[self.snake_head[0], self.snake_head[1], 0] = 125
-            self.grid[self.apple_position[0], self.apple_position[1], 0] = 255
+            self.grid[self.snake_head[0]//10-1, self.snake_head[1]//10-1, 0] = 125
+            self.grid[self.apple_position[0]//10-1, self.apple_position[1]//10-1, 0] = 255
             apple_reward = 1
             self.time_without_apple = 0
         else:
-            self.grid[self.snake_head[0], self.snake_head[1], 0] = 125
-            self.grid[self.snake_position[-1][0], self.snake_position[-1][1], 0] = 0
+            self.grid[self.snake_head[0]//10-1, self.snake_head[1]//10-1, 0] = 125
+            self.grid[self.snake_position[-1][0]//10-1, self.snake_position[-1][1]//10-1, 0] = 0
             self.snake_position.insert(0, list(self.snake_head))
             self.snake_position.pop()
             self.time_without_apple += 1
@@ -229,8 +240,7 @@ class SnakeEnv(gym.Env):
         self.img = np.zeros((500, 500, 3), dtype='uint8')
         # Initial Snake and Apple position
         self.snake_position = [[250, 250], [240, 250], [230, 250]]
-        self.apple_position = [random.randrange(
-            1, 50)*10, random.randrange(1, 50)*10]
+        self.apple_position = [random.randrange(1, 50)*10, random.randrange(1, 50)*10]
         self.score = 0
         self.prev_button_direction = 1
         self.button_direction = 1
@@ -239,10 +249,10 @@ class SnakeEnv(gym.Env):
         self.time_without_apple = 0
         self.done = False
 
-        self.grid = np.zeros((500, 500, 1), dtype='uint8')
-        self.grid[self.apple_position[0], self.apple_position[1], 0] = 255
+        self.grid = np.zeros((50, 50, 1), dtype='uint8')
+        self.grid[self.apple_position[0]//10-1, self.apple_position[1]//10-1, 0] = 255
         for position in self.snake_position:
-            self.grid[position[0], position[1], 0] = 125
+            self.grid[position[0]//10, position[1]//10, 0] = 125
 
         observation = self.grid
 
