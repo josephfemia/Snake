@@ -184,16 +184,30 @@ Also the game was really a 50x50 game with and additional 10 dimensions for draw
 1646506651, PPO
 - Found a bug where we were over estimating the board size by 10
 - The reason for this is that we need to be able to draw the snake, but for our grid for RL each snake position is 1x1 not 10x10
-- This significantly increases training times
+- This significantly decreases training times
+- Uses 4 Vectorized envs with a frame stack of 4
 - Pretty big fix in 2D environment, commit hash: 33adfd38b9a4b254157bee849b5beef7e75d9100
 
 1646507207, PPO
-- Increases the amount of vectorized envs to 10
+- Increases the amount of vectorized envs to 10, and 10 frame stacks
 - The rest is the same as 1646506651
 
 1646509458, PPO
 - Use an RGB matrix as grid
 - The rest is the same as 1646507207
+
+1646510903, PPO
+- Uses 10 Vectorized envs with a frame stack of 4
+- Decreased time_without_apple down to 300
+- The rest is the same as 1646506651
+
+1646515016, A2C
+- Used A2C model
+- The rest is the same as 1646510903
+
+1646516997, PPO
+- Fixes some grid population bugs
+- Commit hash: 
 """
 
 
@@ -202,7 +216,7 @@ class SnakeEnv(gym.Env):
         super(SnakeEnv, self).__init__()
         # Define action and observation space
         self.action_space = spaces.Discrete(4)
-        self.observation_space = spaces.Box(low=0, high=255, shape=(50, 50, 3), dtype='uint8')
+        self.observation_space = spaces.Box(low=0, high=255, shape=(50, 50, 1), dtype='uint8')
 
     def step(self, action):
         button_direction = action
@@ -223,20 +237,20 @@ class SnakeEnv(gym.Env):
         if self.snake_head == self.apple_position:
             self.apple_position, self.score = collision_with_apple(self.apple_position, self.score)
             self.snake_position.insert(0, list(self.snake_head))
-            self.grid[self.snake_head[0]//10-1, self.snake_head[1]//10-1, 1] = 255
+            self.grid[self.snake_head[0]//10-1, self.snake_head[1]//10-1, 0] = 125
             self.grid[self.apple_position[0]//10-1, self.apple_position[1]//10-1, 0] = 255
             apple_reward = 1
             self.time_without_apple = 0
         else:
-            self.grid[self.snake_head[0]//10-1, self.snake_head[1]//10-1, 1] = 255
-            self.grid[self.snake_position[-1][0]//10-1, self.snake_position[-1][1]//10-1, 1] = 0
+            self.grid[self.snake_head[0]//10-1, self.snake_head[1]//10-1, 0] = 125
+            self.grid[self.snake_position[-1][0]//10-1, self.snake_position[-1][1]//10-1, 0] = 0
             self.snake_position.insert(0, list(self.snake_head))
             self.snake_position.pop()
             self.time_without_apple += 1
 
         death_reward = 0
         # On collision kill the snake and print the score
-        if collision_with_boundaries(self.snake_head) == 1 or collision_with_self(self.snake_position) == 1 or self.time_without_apple > 500:
+        if collision_with_boundaries(self.snake_head) == 1 or collision_with_self(self.snake_position) == 1 or self.time_without_apple > 300:
             self.done = True
             death_reward = -1
 
@@ -260,10 +274,10 @@ class SnakeEnv(gym.Env):
         self.time_without_apple = 0
         self.done = False
 
-        self.grid = np.zeros((50, 50, 3), dtype='uint8')
+        self.grid = np.zeros((50, 50, 1), dtype='uint8')
         self.grid[self.apple_position[0]//10-1, self.apple_position[1]//10-1, 0] = 255
         for position in self.snake_position:
-            self.grid[position[0]//10, position[1]//10, 1] = 255
+            self.grid[position[0]//10-1, position[1]//10-1, 0] = 125
 
         observation = self.grid
 
