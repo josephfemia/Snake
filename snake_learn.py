@@ -16,13 +16,14 @@ if not os.path.exists(models_dir):
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
 
-env = make_vec_env(SnakeEnv, n_envs=10)
+env = make_vec_env(SnakeEnv, n_envs=16, seed=0)
 env = VecFrameStack(env, n_stack=4, channels_order='last')
+# env = SnakeEnv()
 env.reset()
 
 model = PPO('CnnPolicy', env, verbose=1, tensorboard_log=log_dir)
 
-TIMESTEPS = 10000
+TIMESTEPS = 5_000_000
 iters = 0
 while True:
     iters += 1
