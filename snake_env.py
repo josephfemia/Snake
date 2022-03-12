@@ -8,16 +8,17 @@ import numpy as np
 from gym import spaces
 
 SNAKE_LEN_GOAL = 30
+GRID_X = 50
+GRID_Y = 50
 
-
-def collision_with_apple(apple_position, score):
-    apple_position = [random.randrange(1, 50)*10, random.randrange(1, 50)*10]
+def collision_with_apple(apple_position, score, GRID_X = 50, GRID_Y = 50):
+    apple_position = [random.randrange(1, GRID_X)*10, random.randrange(1, GRID_Y)*10]
     score += 1
     return apple_position, score
 
 
-def collision_with_boundaries(snake_head):
-    if snake_head[0] >= 500 or snake_head[0] < 0 or snake_head[1] >= 500 or snake_head[1] < 0:
+def collision_with_boundaries(snake_head, GRID_X = 50, GRID_Y = 50):
+    if snake_head[0] >= GRID_X*10 or snake_head[0] < 0 or snake_head[1] >= GRID_Y*10 or snake_head[1] < 0:
         return 1
     else:
         return 0
@@ -38,7 +39,11 @@ class SnakeEnv(gym.Env):
         self.action_space = spaces.Discrete(4)
         self.observation_space = spaces.Box(low=0, high=255, shape=(50, 50, 1), dtype='uint8')
 
+    def _get_observation(self):    
+        return cv2.resize(cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY), (50, 50), interpolation=cv2.INTER_AREA).reshape((50, 50, 1))
+
     def step(self, action):
+        self.render()
         button_direction = action
 
         # Change the head position based on the button direction
@@ -55,58 +60,51 @@ class SnakeEnv(gym.Env):
         self.time_without_apple += 1
         # Increase Snake length on eating apple
         if self.snake_head == self.apple_position:
-            self.apple_position, self.score = collision_with_apple(self.apple_position, self.score)
+            self.apple_position, self.score = collision_with_apple(self.apple_position, self.score, GRID_X, GRID_Y)
             self.snake_position.insert(0, list(self.snake_head))
-            self.grid[self.snake_head[0]//10-1, self.snake_head[1]//10-1, 0] = 125
-            self.grid[self.apple_position[0]//10-1, self.apple_position[1]//10-1, 0] = 255
             apple_reward = 1
             self.time_without_apple = 0
         else:
-            self.grid[self.snake_head[0]//10-1, self.snake_head[1]//10-1, 0] = 125
-            self.grid[self.snake_position[-1][0]//10-1, self.snake_position[-1][1]//10-1, 0] = 0
             self.snake_position.insert(0, list(self.snake_head))
             self.snake_position.pop()
             self.time_without_apple += 1
 
         death_reward = 0
         # On collision kill the snake and print the score
-        if collision_with_boundaries(self.snake_head) == 1 or collision_with_self(self.snake_position) == 1 or self.time_without_apple > 300:
+        if collision_with_boundaries(self.snake_head, GRID_X, GRID_Y) == 1 or collision_with_self(self.snake_position) == 1 or self.time_without_apple > 300:
             self.done = True
             death_reward = -1
 
         self.reward = apple_reward + death_reward
 
         info = {}
-        observation = self.grid
+        observation = self._get_observation()
 
         return observation, self.reward, self.done, info
 
     def reset(self):
-        self.img = np.zeros((500, 500, 3), dtype='uint8')
+        self.img = np.zeros((GRID_X*10, GRID_Y*10, 3), dtype='uint8')
         # Initial Snake and Apple position
-        self.snake_position = [[250, 250], [240, 250], [230, 250]]
-        self.apple_position = [random.randrange(1, 50)*10, random.randrange(1, 50)*10]
+        self.snake_position = [[GRID_X//2*10, GRID_Y//2*10], [(GRID_X//2 - 1)*10, GRID_Y//2*10], [(GRID_X//2 - 2)*10, GRID_Y*10//2]]
+        self.apple_position = [random.randrange(1, GRID_X)*10, random.randrange(1, GRID_Y)*10]
         self.score = 0
         self.prev_button_direction = 1
         self.button_direction = 1
-        self.snake_head = [250, 250]
+        self.snake_head = [GRID_X//2*10, GRID_Y//2*10]
 
         self.time_without_apple = 0
         self.done = False
 
-        self.grid = np.zeros((50, 50, 1), dtype='uint8')
-        self.grid[self.apple_position[0]//10-1, self.apple_position[1]//10-1, 0] = 255
-        for position in self.snake_position:
-            self.grid[position[0]//10-1, position[1]//10-1, 0] = 125
-
-        observation = self.grid
+        observation = self._get_observation()
 
         return observation
 
     def render(self, mode=None):
-        cv2.imshow('a', self.img)
-        cv2.waitKey(1)
-        self.img = np.zeros((500, 500, 3), dtype='uint8')
+        if mode == "human":
+            cv2.imshow('a', self.img)
+            cv2.waitKey(1)
+
+        self.img = np.zeros((GRID_X*10, GRID_Y*10, 3), dtype='uint8')
         # Display Apple
         cv2.rectangle(self.img, (self.apple_position[0], self.apple_position[1]), (self.apple_position[0]+10, self.apple_position[1]+10), (0, 0, 255), 3)
         # Display Snake

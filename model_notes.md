@@ -192,3 +192,11 @@ Also the game was really a 50x50 game with and additional 10 dimensions for draw
 - 16 vectorized env, with a 4 frame stack
 - TIMESTEPS = 5_000_000
 - The rest is the same as 1646516997
+
+
+Finally got proper 2D Snake observations working
+- Finally made 2D snake observation space work
+- Major fix to obervation space generation
+- cv2 switches x and y axis when drawing
+- Support multiple different board sizes for 2D env
+- Also found and fixed something weird when looking at rendered env, it was always 1 frame behind
