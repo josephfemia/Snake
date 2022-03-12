@@ -200,3 +200,4 @@ Finally got proper 2D Snake observations working
 - cv2 switches x and y axis when drawing
 - Support multiple different board sizes for 2D env
 - Also found and fixed something weird when looking at rendered env, it was always 1 frame behind
+- Commit hash: f6a41fe4d9a3cfcd31a83ebca5fa89b012ed2646
