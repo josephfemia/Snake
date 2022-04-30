@@ -2,3 +2,6 @@
 /logs
 __pycache__
 .vscode
+/legacy
+/opt
+notes.md
