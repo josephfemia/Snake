@@ -5,10 +5,10 @@ import os
 import time
 from envs import SnakeEnv, SnakeEnv1D
 
-model_path = os.path.join("models", "full", "1650815114", "model_5000000.zip")
+model_path = os.path.join("models", "2D", "50x50", "1652100208", "model_1806250.zip")
 
 # env = SnakeEnv()
-env = make_vec_env(SnakeEnv, n_envs=1, env_kwargs={"grid_x": 10, "grid_y": 10})
+env = make_vec_env(SnakeEnv, n_envs=1, env_kwargs={"grid_x": 50, "grid_y": 50})
 env = VecFrameStack(env, n_stack=4, channels_order="last")
 
 model = PPO.load(model_path, env=env)

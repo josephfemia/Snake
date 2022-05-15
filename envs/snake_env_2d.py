@@ -29,14 +29,6 @@ class SnakeEnv(gym.Env):
                           (100, 100), interpolation=cv2.INTER_AREA).reshape((100, 100, 1))
 
     def _get_render(self):
-        """
-        This should be the same as the observation but there is a bug in the _get_observation function, where we are reversing the rectangle coordinates
-        in the apple position. This render function just re-draws the apple to the proper location. The _get_observation isnt gonna be fixed because
-        the models have already been trained on this bug for a long time and if it gets fixed it ruins how they perform. Thus I would need to spend a lot of time
-        retraining. Thus I just re-draw the location of the apple to what the model is expecting (to what the bug is causing). This render function will allow you to
-        see more accurately where the apple is. This bug however is unnecessarily adding complexity because the model needs to know the location of the apple
-        and now move to its inverted position to recieve the apple eaten reward.
-        """
         render = np.zeros((self.grid_x * 10, self.grid_y * 10, 3), dtype="uint8")
         cv2.rectangle(render, (self.apple_position[0], self.apple_position[1]),
                       (self.apple_position[0] + 10, self.apple_position[1] + 10), (0, 0, 255), 3)
